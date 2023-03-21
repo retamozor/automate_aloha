@@ -1,0 +1,14 @@
+__pycache__
+.vscode
+*.prf
+
+# Environments
+.env
+.env.*
+
+
+# Logs
+log*
+
+# aplication folders
+caso_[0-9]/
