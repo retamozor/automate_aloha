@@ -1,6 +1,6 @@
 from pywinauto.application import Application
 import pandas as pd
-
+import re
 
 class Aloha:
 
@@ -51,15 +51,17 @@ class Aloha:
   
   def print_sumary(self, run_case=1, index = 0):
     text = self.dlg['Text Summary'].child_window(auto_id="5001", control_type="Edit")
-    red_orange_yellow = text.get_value().split('THREAT ZONE: ')[1].splitlines()[2:5]
+    # red_orange_yellow = text.get_value().split('THREAT ZONE: ')[1].splitlines()[2:5]
+    sumary = text.get_value().split('THREAT ZONE: ')[1]
+    red_orange_yellow = re.findall(' [Red|Orange|Yellow].*:.*meters.*---.*[(].*[)]', sumary)
     # for each line in red_orange_yellow: split by ':'
 
-    colors = {'index': [index], 'Red': [], 'Orange': [], 'Yellow': []}
+    colors = {'index': [index], 'Red': [''], 'Orange': [''], 'Yellow': ['']}
     for line in red_orange_yellow:
       color = line.split(': ')[0].strip()
       data = line.split(': ')[1].strip()
       #save in dict
-      colors[color].append(data)
+      colors[color] = [data]
 
     # save in csv
     pd.DataFrame.from_dict(colors, orient='columns').to_csv(r'caso_{}\Colors.csv'.format(run_case), mode='a', header=False)
@@ -86,7 +88,7 @@ class Aloha:
       elif (run_case == 2):
         self.setMaximumPuddleSize()
 
-      self.threatZone(index)
+      self.threatZone(run_case, index)
       self.print_sumary(run_case, index)
 
     except:
@@ -162,22 +164,27 @@ class Aloha:
     return
 
   def setTankSizeAndOrientation(self, data):
-    # self.dlg.Menu3.SetUp.select()
-    # self.dlg.SetUpDialog.SetUp.Source.select()
-    # self.dlg.SourceDialog.Source.child_window(title="  Tank...	Ctrl+T", auto_id="408", control_type="MenuItem").select()
     self.dlg.type_keys('^t')
 
     tank = self.dlg['Tank Size and Orientation']
 
     diameter = tank.child_window(auto_id="9", control_type="Edit")
-    meters = tank.child_window(
-        title="meters", auto_id="13", control_type="RadioButton")
+    # meters = tank.child_window(
+    #     title="meters", auto_id="13", control_type="RadioButton")
     length = tank.child_window(
         title="length", auto_id="15", control_type="Edit")
+    
+    if data["Tank Type"] == "Horizontal":
+      tank.child_window(title=" ", auto_id="4", control_type="RadioButton").click()
+      length.set_text(data['Tank length'])
+    elif data["Tank Type"] == "vertical":
+      tank.child_window(title=" ", auto_id="5", control_type="RadioButton").click()
+      length.set_text(data['Tank length'])
+    elif data["Tank Type"] == "Sphere":
+      tank.child_window(title=" ", auto_id="6", control_type="RadioButton").click()
 
     diameter.set_text(data['Tank Diameter'])
-    meters.click()
-    length.set_text(data['Tank length'])
+    tank.meters.click()
     tank.OK.click()
     # tank.print_control_identifiers()
     return
@@ -248,11 +255,25 @@ class Aloha:
     puddle_parameters = self.dlg['Maximum Puddle Size']
     puddle_parameters.Ok.click()
     
+  def setHazardToAnalyze(self):
+    self.dlg['Hazard To Analyze'].wait('visible')
+    hazard = self.dlg['Hazard To Analyze']
+    hazard.child_window(title="Flammable Area of Vapor Cloud", auto_id="6", control_type="RadioButton").click()
+    hazard.OK.click()
       
+    self.dlg['.*Flamable Level.*'].OK.click()
+    return
 
-  def threatZone(self, index=1):
-    self.dlg.type_keys('^f')
-    self.dlg['Thermal Radiation Level of Concern'].Ok.click()
+  def threatZone(self, run_case=1, index=1):
+    if (run_case == 1):
+      self.dlg.type_keys('^f')
+      try:
+        self.setHazardToAnalyze()
+      except:
+        pass
+    else:
+      self.dlg['Thermal Radiation Level of Concern'].Ok.click()
+    
     self.dlg['Thermal Radiation Threat Zone'].wait('visible')
     self.dlg['Thermal Radiation Threat Zone'].Cerrar.click()
 

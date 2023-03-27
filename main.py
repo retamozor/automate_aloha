@@ -45,13 +45,19 @@ alohaApp.setup()
 for i, x in enumerate(data):
   try:
     print('run {i}'.format(i=i))
-    with open('caso_2\\{i}.kml', 'r') as f:
+    with open(r'caso_{run_case}\{i}.kml'.format(run_case = run_case, i = i), 'r') as f:
       print('Already done {i}'.format(i=i))
   except:
     # read Color.csv and find index i in column 'index'
     df = pd.read_csv(colors_path)
     if (i in df['index'].values):
       print('Already done {i}'.format(i=i))
+      continue
+    if (x['Liquid level'] == 0):
+      print('Liquid level = 0')
+      continue
+    if x['Liquid level'] <= x['Height of the Tank opening']:
+      print('Liquid level <= Height of the Tank opening')
       continue
     alohaApp.run(x, i, run_case)
     print('Done {i}'.format(i=i))
