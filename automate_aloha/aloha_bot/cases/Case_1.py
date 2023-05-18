@@ -1,55 +1,26 @@
-from pywinauto.application import Application
+from pywinauto.application import WindowSpecification
+from .Strategy import Strategy
 import pandas as pd
 import re
 
-class Aloha:
+class Case_1(Strategy):
 
-  def __init__(self, path):
-    self.path = path
+  def __init__(self, dlg: WindowSpecification, lat_deg, lat_min, long_deg, long_min) -> None:
+    self.dlg = dlg
+    self.lat_deg = lat_deg
+    self.lat_min = lat_min
+    self.long_deg = long_deg
+    self.long_min =long_min
     self.first_run = True
 
-  def setup(self):
-    self.app = Application(backend="uia")
-    try:
-      self.app.connect(path=r'{}'.format(self.path))
-      self.close()
-    except:
-      print('not open')
-
-    self.app.start(self.path)
-    self.dlg = self.app['ALOHA 5.4.7']
-    # self.print_self()
-    # return
-    self.dlg["ALOHA's Limitations"].wait('visible')
-    self.dlg["ALOHA's Limitations"].OK.click()
-
-    # get location
-    self.dlg.type_keys('^l')
-    self.dlg['Location Information'].Modify.click()
-    location = self.dlg['Location Input']
-    self.lat_deg = location.child_window(title="Longitude", auto_id="22", control_type="Edit").get_value()
-    self.lat_min = location.child_window(auto_id="23", control_type="Edit").get_value()
-    self.long_deg = location.child_window(auto_id="25", control_type="Edit").get_value()
-    self.long_min = location.child_window(auto_id="26", control_type="Edit").get_value()
-    location.type_keys('{ESC}')
-    self.dlg['Location Information'].type_keys('{ESC}')
-
-    # set up chemical
-
+  def set_up_chemical(self) -> None:
     self.dlg.type_keys('^h')
     chemical = self.dlg['Chemical Information']
     chemical_list = chemical.child_window(auto_id="6", control_type="List")
     chemical_list['CYCLOHEXANONE'].select()
-    # self.dlg['Chemical Information'].Select.click()
     chemical.type_keys('{ENTER}')
-
-    return
-
-  def print_self(self):
-    self.app['ALOHA 5.4.7'].print_control_identifiers()
-    return
   
-  def print_sumary(self, run_case=1, index = 0):
+  def print_sumary(self, index = 0):
     text = self.dlg['Text Summary'].child_window(auto_id="5001", control_type="Edit")
     # red_orange_yellow = text.get_value().split('THREAT ZONE: ')[1].splitlines()[2:5]
     sumary = text.get_value().split('THREAT ZONE: ')[1]
@@ -64,11 +35,11 @@ class Aloha:
       colors[color] = [data]
 
     # save in csv
-    pd.DataFrame.from_dict(colors, orient='columns').to_csv(r'caso_{}\Colors.csv'.format(run_case), mode='a', header=False)
+    pd.DataFrame.from_dict(colors, orient='columns').to_csv(r'automate_aloha\out\caso_1\Colors.csv', mode='a', header=False)
     
     return
-
-  def run(self, data, index, run_case=1):
+  
+  def run(self, data, index) -> None:
     successful_run = True
     # Atmospheric Options
     self.setAtmospheric(data)
@@ -78,18 +49,15 @@ class Aloha:
     self.setTankSizeAndOrientation(data)
     self.setChemicalStateAndTemperature(data)
     self.setLiquidMassOrVolume(data)
-    self.selectSenario(run_case)
+    self.selectSenario()
     self.setAreaAndTypeOfLeak(data)
     self.setHeightOfTheTankOpening(data)
 
     try:
-      if (run_case == 1):
-        self.setPuddleParameters()
-      elif (run_case == 2):
-        self.setMaximumPuddleSize()
+      self.setPuddleParameters()
 
-      self.threatZone(run_case, index)
-      self.print_sumary(run_case, index)
+      self.threatZone(index)
+      self.print_sumary(index)
 
     except:
       print('liquid level is too high')
@@ -204,22 +172,10 @@ class Aloha:
     # tank.print_control_identifiers()
     return
 
-  def selectSenario(self, run_case):
+  def selectSenario(self):
     senario = self.dlg['Type of Tank Failure']
-    if (run_case == 1):
-      senario.child_window(title="Leaking tank, chemical is not burning and forms an evaporating puddle", auto_id="6", control_type="RadioButton").click()
-      senario.OK.click()
-    elif (run_case == 2):
-      senario.child_window(title="Leaking tank, chemical is burning and forms a pool fire", auto_id="7", control_type="RadioButton").click()
-      senario.OK.click()
-      try:
-        senario.Dialog3.Yes.click()
-      except:
-        print('No dialog 3')
-      
-    else:
-      senario.child_window(title="BLEVE, tank explodes and chemical burns in a fireball", auto_id="8", control_type="RadioButton").click()
-      senario.OK.click()
+    senario.child_window(title="Leaking tank, chemical is not burning and forms an evaporating puddle", auto_id="6", control_type="RadioButton").click()
+    senario.OK.click()
     return
 
   def setAreaAndTypeOfLeak(self, data):
@@ -264,15 +220,12 @@ class Aloha:
     self.dlg['.*Flamable Level.*'].OK.click()
     return
 
-  def threatZone(self, run_case=1, index=1):
-    if (run_case == 1):
-      self.dlg.type_keys('^f')
-      try:
-        self.setHazardToAnalyze()
-      except:
-        pass
-    else:
-      self.dlg['Thermal Radiation Level of Concern'].Ok.click()
+  def threatZone(self,  index=1):
+    self.dlg.type_keys('^f')
+    try:
+      self.setHazardToAnalyze()
+    except:
+      pass
     
     self.dlg['Thermal Radiation Threat Zone'].wait('visible')
     self.dlg['Thermal Radiation Threat Zone'].Cerrar.click()
@@ -298,8 +251,4 @@ class Aloha:
     export.Ok.click()
     self.dlg['.*Save Threat Zone.*'].type_keys(index)
     self.dlg['.*Save Threat Zone.*'].type_keys('{ENTER}')
-    
   
-  def close(self):
-    self.app.kill()
-    return
