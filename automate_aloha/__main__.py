@@ -5,7 +5,6 @@ from aloha_bot import Aloha
 import os
 import sys
 
-sys.stdout = open(r'automate_aloha\logs\logs.txt', 'w')
 print('Running Case: ', ALOHA_CASE)
 
 # read .csv file
@@ -16,7 +15,7 @@ data = df.to_dict(orient='records')
 
 # set up the foder
 if not os.path.exists(r'automate_aloha\out\caso_{}'.format(ALOHA_CASE)):
-  print('no existe')
+  print('the folder does not exist, making a new one')
   os.makedirs(r'automate_aloha\out\caso_{}'.format(ALOHA_CASE))
 
 colors_path = r'automate_aloha\out\caso_{}\Colors.csv'.format(ALOHA_CASE)
@@ -36,6 +35,8 @@ except:
   pd.DataFrame.from_dict(colors, orient='columns').to_csv(colors_path, mode='w')
 
 close = True
+sys.stdout = open(r'automate_aloha\logs\logs.txt', 'w')
+
 # open Aloha 5.4.7
 
 alohaApp = Aloha(ALOHA_PATH, ALOHA_CASE, close)
@@ -45,7 +46,7 @@ if close:
   for i, x in enumerate(data):
     try:
       print('run {i}'.format(i=i))
-      with open(r'caso_{run_case}\{i}.kml'.format(run_case = ALOHA_CASE, i = i), 'r') as f:
+      with open(r'automate_aloha\data\caso_{run_case}\{i}.kml'.format(run_case = ALOHA_CASE, i = i), 'r') as f:
         print('Already done {i}'.format(i=i))
     except:
       # read Color.csv and find index i in column 'index'
@@ -72,3 +73,4 @@ else:
 # close Aloha 5.4.7
 
 
+sys.stdout.close()
