@@ -19,6 +19,31 @@ Además, es necesario configurar algunas variables de entorno antes de ejecutar 
 - `ALOHA_DATA`: Ruta del archivo CSV que contiene los datos de entrada para las simulaciones.
 Asegúrate de definir estas variables de entorno correctamente antes de ejecutar el programa.
 
+Opcionalmente, puedes crear un entorno virtual para aislar las dependencias del proyecto. Sigue los siguientes pasos para crear y activar un entorno virtual:
+
+Abre una terminal en la raíz del proyecto.
+
+Ejecuta el siguiente comando para crear un nuevo entorno virtual:
+
+```bash
+python -m venv env
+```
+Activa el entorno virtual. Dependiendo del sistema operativo, ejecuta uno de los siguientes comandos:
+
+- En Windows:
+
+```bash
+.\env\Scripts\activate
+```
+
+- En macOS/Linux:
+
+```bash
+source env/bin/activate
+```
+
+Con el entorno virtual activado, puedes instalar las dependencias y ejecutar el programa sin afectar la instalación global de Python.
+
 ## Estructura del proyecto
 El proyecto está organizado de la siguiente manera:
 
@@ -40,3 +65,6 @@ python -m automate_aloha
 ```
 
 Durante la ejecución, el programa generará archivos de registro en la carpeta `automate_aloha/logs`, así como archivos de resultados en la carpeta `automate_aloha/out`.
+
+
+Recuerda que el uso de un entorno virtual es opcional, pero puede ser útil para mantener las dependencias del proyecto aisladas del entorno global de Python.
