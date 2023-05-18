@@ -5,10 +5,7 @@ __pycache__
 # Environments
 .env
 .env.*
-
-
-# Logs
-log*
+.venv
 
 # aplication folders
 caso_[0-9]/
