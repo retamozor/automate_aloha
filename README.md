@@ -66,7 +66,7 @@ Antes de ejecutar el programa, asegúrate de haber configurado correctamente las
 Para ejecutar el programa, utiliza el siguiente comando:
 
 ```bash
-python -m automate_aloha
+python automate_aloha
 ```
 
 Durante la ejecución, el programa generará archivos de registro en la carpeta `automate_aloha/logs`, así como archivos de resultados en la carpeta `automate_aloha/out`.
