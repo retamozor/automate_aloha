@@ -12,6 +12,7 @@ Antes de utilizar este programa, asegúrate de tener instalado lo siguiente:
   ```bash
   pip install -r requirements.txt
   ```
+
 Además, es necesario configurar algunas variables de entorno antes de ejecutar el programa:
 
 - `ALOHA_PATH`: Ruta de instalación de Aloha 5.4.7.
@@ -21,30 +22,32 @@ Asegúrate de definir estas variables de entorno correctamente antes de ejecutar
 
 Opcionalmente, puedes crear un entorno virtual para aislar las dependencias del proyecto. Sigue los siguientes pasos para crear y activar un entorno virtual:
 
-Abre una terminal en la raíz del proyecto.
+1. Abre una terminal en la raíz del proyecto.
 
-Ejecuta el siguiente comando para crear un nuevo entorno virtual:
+2. Ejecuta el siguiente comando para crear un nuevo entorno virtual:
 
-```bash
-python -m venv env
-```
-Activa el entorno virtual. Dependiendo del sistema operativo, ejecuta uno de los siguientes comandos:
+    ```bash
+    python -m venv env
+    ```
+
+3. Activa el entorno virtual. Dependiendo del sistema operativo, ejecuta uno de los siguientes comandos:
 
 - En Windows:
 
-```bash
-.\env\Scripts\activate
-```
+  ```bash
+  .\env\Scripts\activate
+  ```
 
 - En macOS/Linux:
 
-```bash
-source env/bin/activate
-```
+  ```bash
+  source env/bin/activate
+  ```
 
 Con el entorno virtual activado, puedes instalar las dependencias y ejecutar el programa sin afectar la instalación global de Python.
 
 ## Estructura del proyecto
+
 El proyecto está organizado de la siguiente manera:
 
 - `automate_aloha/__main__.py`: Punto de entrada del programa. Aquí se encuentra el código principal para ejecutar las simulaciones.
@@ -57,14 +60,15 @@ El proyecto está organizado de la siguiente manera:
 - `automate_aloha/aloha_bot/cases/Case_1.py` y `automate_aloha/aloha_bot/cases/Case_2.py`: Implementaciones de estrategias para los casos de estudio 1 y 2, respectivamente.
 
 ## Uso
+
 Antes de ejecutar el programa, asegúrate de haber configurado correctamente las variables de entorno y haber proporcionado el archivo CSV de datos de entrada.
 
 Para ejecutar el programa, utiliza el siguiente comando:
+
 ```bash
 python -m automate_aloha
 ```
 
 Durante la ejecución, el programa generará archivos de registro en la carpeta `automate_aloha/logs`, así como archivos de resultados en la carpeta `automate_aloha/out`.
-
 
 Recuerda que el uso de un entorno virtual es opcional, pero puede ser útil para mantener las dependencias del proyecto aisladas del entorno global de Python.
