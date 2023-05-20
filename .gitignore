@@ -1,6 +1,7 @@
 __pycache__
 .vscode
 *.prf
+*.PAS
 
 # Environments
 .env

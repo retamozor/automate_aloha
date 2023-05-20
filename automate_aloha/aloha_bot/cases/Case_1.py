@@ -2,6 +2,7 @@ from pywinauto.application import WindowSpecification
 from .Strategy import Strategy
 import pandas as pd
 import re
+import sys
 
 class Case_1(Strategy):
 
@@ -250,5 +251,9 @@ class Case_1(Strategy):
       export.child_window(auto_id="21", control_type="Edit").set_text(self.long_min)
     export.Ok.click()
     self.dlg['.*Save Threat Zone.*'].type_keys(index)
+    if (self.first_run):
+      sys.stdout = sys.__stdout__
+      input("Press Enter to continue...")
+      sys.stdout = open(r'automate_aloha\logs\logs.txt', 'a')
     self.dlg['.*Save Threat Zone.*'].type_keys('{ENTER}')
   

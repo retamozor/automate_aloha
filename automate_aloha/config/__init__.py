@@ -25,3 +25,25 @@ if not data:
     raise EnvironmentError('la variable de entorno ALOHA_DATA no esta definida')
 
 ALOHA_DATA = data
+
+OUT_DATA = {}
+
+# caso 1
+OUT_DATA['1'] = {
+    'index' : [],
+    'Red'   : [],
+    'Orange': [],
+    'Yellow': [],
+}
+
+# caso 2
+OUT_DATA['2'] = {
+    'index' : [],
+    'Red'   : [],
+    'Orange': [],
+    'Yellow': [],
+    'Max Flame Length': [],
+    'Burn Duration': [],
+    'Max Burn Rate': [],
+    'Total Amount Burned': [],
+}

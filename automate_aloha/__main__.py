@@ -1,8 +1,9 @@
 
 import pandas as pd
-from config import ALOHA_PATH, ALOHA_DATA, ALOHA_CASE
+from config import ALOHA_PATH, ALOHA_DATA, ALOHA_CASE, OUT_DATA
 from aloha_bot import Aloha
 import os
+import re
 import sys
 
 print('Running Case: ', ALOHA_CASE)
@@ -26,12 +27,7 @@ try:
   with open(colors_path, 'r') as f:
     pass
 except:
-  colors = {
-    'index' : [],
-    'Red'   : [],
-    'Orange': [],
-    'Yellow': [],
-  }
+  colors = OUT_DATA[ALOHA_CASE]
   pd.DataFrame.from_dict(colors, orient='columns').to_csv(colors_path, mode='w')
 
 close = True
@@ -64,13 +60,13 @@ if close:
       print('Done {i}'.format(i=i))
     print('----------------------------------')
 
+# close Aloha 5.4.7
   alohaApp.close()
 else:
   try:
     alohaApp.print_self()
   except:
     print('No se pudo imprimir')
-# close Aloha 5.4.7
 
 
 sys.stdout.close()

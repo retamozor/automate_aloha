@@ -23,12 +23,21 @@ class Case_2(Strategy):
 
   def print_sumary(self, index = 0):
     text = self.dlg['Text Summary'].child_window(auto_id="5001", control_type="Edit")
-    # red_orange_yellow = text.get_value().split('THREAT ZONE: ')[1].splitlines()[2:5]
     sumary = text.get_value().split('THREAT ZONE: ')[1]
+    source = text.get_value().split('SOURCE STRENGTH:')[1].split(' THREAT ZONE: ')[0]
     red_orange_yellow = re.findall(' [Red|Orange|Yellow].*:.*meters.*---.*[(].*[)]', sumary)
     # for each line in red_orange_yellow: split by ':'
 
-    colors = {'index': [index], 'Red': [''], 'Orange': [''], 'Yellow': ['']}
+    colors = {
+      'index': [index],
+      'Red': [''],
+      'Orange': [''],
+      'Yellow': [''],
+      'Max Flame Length': [re.findall('Max Flame Length: .*yards', source)[0].split(': ')[1].strip()],
+      'Burn Duration': [re.findall('Burn Duration: .*', source)[0].split(': ')[1].strip()],
+      'Max Burn Rate': [re.findall('Max Burn Rate: .*', source)[0].split(': ')[1].strip()],
+      'Total Amount Burned': [re.findall('Total Amount Burned: .*', source)[0].split(': ')[1].strip()],
+    }
     for line in red_orange_yellow:
       color = line.split(': ')[0].strip()
       data = line.split(': ')[1].strip()
@@ -42,6 +51,10 @@ class Case_2(Strategy):
   
   def run(self, data, index) -> None:
     successful_run = True
+
+    # Set Building Type
+    self.setBuildingType(data)
+
     # Atmospheric Options
     self.setAtmospheric(data)
     self.setAtmospheric2(data)
@@ -54,25 +67,43 @@ class Case_2(Strategy):
     self.setAreaAndTypeOfLeak(data)
     self.setHeightOfTheTankOpening(data)
 
-    # try:
-    self.setMaximumPuddleSize()
+    try:
+      self.setMaximumPuddleSize()
 
-    self.threatZone(index)
-    self.print_sumary(index)
+      self.threatZone(index)
+      self.print_sumary(index)
 
-    # except:
-    #   print('liquid level is too high')
-    #   self.dlg['Height of the Tank Opening'].Dialog3.OK.click()
-    #   self.dlg['Height of the Tank Opening'].type_keys('{ESC}')
-    #   self.dlg['Area and Type of Leak'].type_keys('{ESC}')
-    #   self.dlg['Type of Tank Failure'].type_keys('{ESC}')
-    #   self.dlg['Liquid Mass or Volume'].type_keys('{ESC}')
-    #   self.dlg['Chemical State and Temperature'].type_keys('{ESC}')
-    #   self.dlg['Tank Size and Orientation'].type_keys('{ESC}')
-    #   successful_run=False
+    except:
+      print('liquid level is too high')
+      self.dlg['Height of the Tank Opening'].Dialog3.OK.click()
+      self.dlg['Height of the Tank Opening'].type_keys('{ESC}')
+      self.dlg['Area and Type of Leak'].type_keys('{ESC}')
+      self.dlg['Type of Tank Failure'].type_keys('{ESC}')
+      self.dlg['Liquid Mass or Volume'].type_keys('{ESC}')
+      self.dlg['Chemical State and Temperature'].type_keys('{ESC}')
+      self.dlg['Tank Size and Orientation'].type_keys('{ESC}')
+      successful_run=False
 
     if successful_run:
       self.first_run = False
+
+    return
+
+  def setBuildingType(self, data):
+    self.dlg.Menu3.SiteData.select()
+    self.dlg.SiteDataDialog.SiteData.child_window(title="Building Type...", auto_id="302", control_type="MenuItem").select()
+    self.dlg.print_control_identifiers()
+    buiding_params = self.dlg["Infiltration Building Parameters"]
+
+    if data["Building"] == "Enclosed office":
+      building = buiding_params.child_window(title="Enclosed office building", auto_id="4", control_type="RadioButton")
+    elif data["Building"] == "Single office":
+      building = buiding_params.child_window(title="Single storied building", auto_id="5", control_type="RadioButton")
+    else:
+      building = buiding_params.child_window(title="Double storied building", auto_id="6", control_type="RadioButton")
+
+    building.select()
+    buiding_params.Ok.click()
 
     return
 
