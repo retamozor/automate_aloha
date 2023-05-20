@@ -1,6 +1,6 @@
 # Automate Aloha
 
-Este repositorio contiene un programa de automatización escrito en Python para interactuar con el software Aloha 5.4.7. El objetivo del programa es ejecutar simulaciones y generar informes de resultados para diferentes casos de estudio.
+Este repositorio contiene un programa de automatización escrito en Python para interactuar con el software `Aloha 5.4.7.` El objetivo del programa es ejecutar simulaciones y generar informes de resultados para diferentes casos de estudio.
 
 ## Requisitos
 
@@ -66,9 +66,11 @@ Antes de ejecutar el programa, asegúrate de haber configurado correctamente las
 Para ejecutar el programa, utiliza el siguiente comando:
 
 ```bash
-python -m automate_aloha
+python automate_aloha
 ```
 
 Durante la ejecución, el programa generará archivos de registro en la carpeta `automate_aloha/logs`, así como archivos de resultados en la carpeta `automate_aloha/out`.
+
+Cuando `automate_aloha` vaya a guardar el primer archivo KML en `Aloha 5.4.7.`, se detendrá para esperar que selecciones la ruta en `Aloha 5.4.7.` donde se guardarán todos los archivos KML. Es importante que elijas la carpeta generada por el programa, la cual se encuentra en la ruta `automate_aloha/out`.
 
 Recuerda que el uso de un entorno virtual es opcional, pero puede ser útil para mantener las dependencias del proyecto aisladas del entorno global de Python.
