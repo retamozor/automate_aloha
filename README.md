@@ -38,12 +38,6 @@ Opcionalmente, puedes crear un entorno virtual para aislar las dependencias del 
   .\env\Scripts\activate
   ```
 
-- En macOS/Linux:
-
-  ```bash
-  source env/bin/activate
-  ```
-
 Con el entorno virtual activado, puedes instalar las dependencias y ejecutar el programa sin afectar la instalación global de Python.
 
 ## Estructura del proyecto
