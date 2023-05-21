@@ -32,9 +32,9 @@ Opcionalmente, puedes crear un entorno virtual para aislar las dependencias del 
 
 3. Ejecuta el siguiente comando para activar el entorno virtual:
 
-  ```bash
-  .\env\Scripts\activate
-  ```
+    ```bash
+    .\env\Scripts\activate
+    ```
 
 Con el entorno virtual activado, puedes instalar las dependencias y ejecutar el programa sin afectar la instalación global de Python.
 
