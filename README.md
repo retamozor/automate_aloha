@@ -30,18 +30,10 @@ Opcionalmente, puedes crear un entorno virtual para aislar las dependencias del 
     python -m venv env
     ```
 
-3. Activa el entorno virtual. Dependiendo del sistema operativo, ejecuta uno de los siguientes comandos:
-
-- En Windows:
+3. Ejecuta el siguiente comando para activar el entorno virtual:
 
   ```bash
   .\env\Scripts\activate
-  ```
-
-- En macOS/Linux:
-
-  ```bash
-  source env/bin/activate
   ```
 
 Con el entorno virtual activado, puedes instalar las dependencias y ejecutar el programa sin afectar la instalación global de Python.
