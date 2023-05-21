@@ -11,6 +11,7 @@ class Aloha:
     self.app = Application(backend="uia")
     try:
       self.app.connect(path=r'{}'.format(self.path))
+      self.dlg = self.app['ALOHA 5.4.7']
       if close:
         self.close()
     except:
@@ -21,7 +22,7 @@ class Aloha:
 
     self.app.start(self.path)
     self.dlg = self.app['ALOHA 5.4.7']
-    # self.print_self()
+
     # return
     self.dlg["ALOHA's Limitations"].wait('visible')
     self.dlg["ALOHA's Limitations"].OK.click()

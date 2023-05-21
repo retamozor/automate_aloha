@@ -1,8 +1,8 @@
 from pywinauto.application import WindowSpecification
 from .Strategy import Strategy
+from .Functions import Functions
 import pandas as pd
 import re
-import sys
 
 class Case_2(Strategy):
 
@@ -13,22 +13,29 @@ class Case_2(Strategy):
     self.long_deg = long_deg
     self.long_min =long_min
     self.first_run = True
+    self.functions = Functions(dlg)
 
   def set_up_chemical(self) -> None:
-    self.dlg.type_keys('^h')
-    chemical = self.dlg['Chemical Information']
-    chemical_list = chemical.child_window(auto_id="6", control_type="List")
-    chemical_list['CYCLOHEXANONE'].select()
-    chemical.type_keys('{ENTER}')
+    self.functions.set_up_chemical('CYCLOHEXANONE')
+    return
 
   def print_sumary(self, index = 0):
-    text = self.dlg['Text Summary'].child_window(auto_id="5001", control_type="Edit")
-    # red_orange_yellow = text.get_value().split('THREAT ZONE: ')[1].splitlines()[2:5]
+    text = self.dlg['Text Summary'].child_window(auto_id='5001', control_type='Edit')
     sumary = text.get_value().split('THREAT ZONE: ')[1]
+    source = text.get_value().split('SOURCE STRENGTH:')[1].split(' THREAT ZONE: ')[0]
     red_orange_yellow = re.findall(' [Red|Orange|Yellow].*:.*meters.*---.*[(].*[)]', sumary)
     # for each line in red_orange_yellow: split by ':'
 
-    colors = {'index': [index], 'Red': [''], 'Orange': [''], 'Yellow': ['']}
+    colors = {
+      'index': [index],
+      'Red': [''],
+      'Orange': [''],
+      'Yellow': [''],
+      'Max Flame Length': [re.findall('Max Flame Length: .*yards', source)[0].split(': ')[1].strip()],
+      'Burn Duration': [re.findall('Burn Duration: .*', source)[0].split(': ')[1].strip()],
+      'Max Burn Rate': [re.findall('Max Burn Rate: .*', source)[0].split(': ')[1].strip()],
+      'Total Amount Burned': [re.findall('Total Amount Burned: .*', source)[0].split(': ')[1].strip()],
+    }
     for line in red_orange_yellow:
       color = line.split(': ')[0].strip()
       data = line.split(': ')[1].strip()
@@ -42,190 +49,75 @@ class Case_2(Strategy):
   
   def run(self, data, index) -> None:
     successful_run = True
+
+    # Set Building Type
+    self.functions.set_building_type(data['Building'])
+
     # Atmospheric Options
-    self.setAtmospheric(data)
-    self.setAtmospheric2(data)
+    self.functions.set_atmospheric_options(
+      data['Ground roughtness'],
+      data['Wind speed'],
+      data['Wind is from'],
+      data['Cloud cover'],
+    )
+    self.functions.set_atmospheric_options_2(
+      data['Air themperature'],
+      data['Humidity'],
+    )
 
     # Source Options
-    self.setTankSizeAndOrientation(data)
-    self.setChemicalStateAndTemperature(data)
-    self.setLiquidMassOrVolume(data)
-    self.selectSenario()
-    self.setAreaAndTypeOfLeak(data)
-    self.setHeightOfTheTankOpening(data)
+    self.functions.set_tank_size_and_orientation(
+      data['Tank Type'],
+      data['Tank length'],
+      data['Tank Diameter'],
+    )
+    self.functions.set_chemical_state_and_temperature(data['Stored Themperature'])
+    self.functions.set_liquid_mass_or_volume(data['Liquid level'])
+    self.select_senario()
+    self.functions.set_area_and_type_of_leak(
+      data['Leak through'],
+      data['Opening Diameter (inches)'],
+    )
+    self.functions.set_height_of_the_tank_opening(data['Height of the Tank opening'])
 
-    # try:
-    self.setMaximumPuddleSize()
+    try:
+      self.set_maximum_puddle_size()
 
-    self.threatZone(index)
-    self.print_sumary(index)
+      self.threat_zone(index)
+      self.print_sumary(index)
 
-    # except:
-    #   print('liquid level is too high')
-    #   self.dlg['Height of the Tank Opening'].Dialog3.OK.click()
-    #   self.dlg['Height of the Tank Opening'].type_keys('{ESC}')
-    #   self.dlg['Area and Type of Leak'].type_keys('{ESC}')
-    #   self.dlg['Type of Tank Failure'].type_keys('{ESC}')
-    #   self.dlg['Liquid Mass or Volume'].type_keys('{ESC}')
-    #   self.dlg['Chemical State and Temperature'].type_keys('{ESC}')
-    #   self.dlg['Tank Size and Orientation'].type_keys('{ESC}')
-    #   successful_run=False
+    except:
+      print('liquid level is too high')
+      self.dlg['Height of the Tank Opening'].Dialog3.OK.click()
+      self.dlg['Height of the Tank Opening'].type_keys('{ESC}')
+      self.dlg['Area and Type of Leak'].type_keys('{ESC}')
+      self.dlg['Type of Tank Failure'].type_keys('{ESC}')
+      self.dlg['Liquid Mass or Volume'].type_keys('{ESC}')
+      self.dlg['Chemical State and Temperature'].type_keys('{ESC}')
+      self.dlg['Tank Size and Orientation'].type_keys('{ESC}')
+      successful_run=False
 
     if successful_run:
       self.first_run = False
 
     return
 
-  def setAtmospheric(self, data):
-    self.dlg.type_keys('^a')
-
-    atmospheric = self.dlg['Atmospheric Options']
-
-    wind_speed = atmospheric.child_window(
-        title="Wind Speed is :", auto_id="4", control_type="Edit")
-    wind_is_from = atmospheric.child_window(
-        title="Wind is from    :", auto_id="10", control_type="Edit")
-
-    if (data['Ground roughtness'] == 'open country'):
-        ground_roughness = atmospheric.child_window(
-            title="Open Country", auto_id="26", control_type="RadioButton")
-    elif (data['Ground roughtness'] == 'Urban or forest'):
-        ground_roughness = atmospheric.child_window(
-            title="Urban or Forest", auto_id="27", control_type="RadioButton")
-    else:
-        ground_roughness = atmospheric.child_window(
-            title="Open Water", auto_id="28", control_type="RadioButton")
-
-    cloud_cover = atmospheric.child_window(
-        auto_id="50", control_type="Edit")
-
-    wind_speed.set_text(data['Wind speed'])
-    wind_is_from.set_text(data['Wind is from'])
-    ground_roughness.click()
-    cloud_cover.set_text(data['Cloud cover'])
-    atmospheric.OK.click()
-    try:
-      atmospheric.Dialog3.OK.click()
-    except:
-      print('No dialog')
-    
-    return
-
-  def setAtmospheric2(self, data):
-    atmospheric = self.dlg['Atmospheric Options 2']
-    air_temperature = atmospheric.child_window(
-      title="Air Temperature is :", auto_id="4", control_type="Edit")
-    celcius = atmospheric.child_window(
-      title="C", auto_id="7", control_type="RadioButton")
-    humidity = atmospheric.child_window(
-      title="(0 - 100)", auto_id="37", control_type="Edit")
-
-    air_temperature.set_text(data['Air themperature'])
-    celcius.click()
-    humidity.set_text(data['Humidity'])
-
-    # atmospheric.print_control_identifiers()
-    atmospheric.OK.click()
-    try:
-      self.dlg['Note !Dialog'].OK.click()
-    except:
-      print('No dialog 2')
-    return
-
-  def setTankSizeAndOrientation(self, data):
-    self.dlg.type_keys('^t')
-
-    tank = self.dlg['Tank Size and Orientation']
-
-    diameter = tank.child_window(auto_id="9", control_type="Edit")
-    # meters = tank.child_window(
-    #     title="meters", auto_id="13", control_type="RadioButton")
-    length = tank.child_window(
-        title="length", auto_id="15", control_type="Edit")
-    
-    if data["Tank Type"] == "Horizontal":
-      tank.child_window(title=" ", auto_id="4", control_type="RadioButton").click()
-      length.set_text(data['Tank length'])
-    elif data["Tank Type"] == "vertical":
-      tank.child_window(title=" ", auto_id="5", control_type="RadioButton").click()
-      length.set_text(data['Tank length'])
-    elif data["Tank Type"] == "Sphere":
-      tank.child_window(title=" ", auto_id="6", control_type="RadioButton").click()
-
-    diameter.set_text(data['Tank Diameter'])
-    tank.meters.click()
-    tank.OK.click()
-    # tank.print_control_identifiers()
-    return
-
-  def setChemicalStateAndTemperature(self, data):
-    tank = self.dlg['Chemical State and Temperature']
-    tank.type_keys(data['Stored Themperature'])
-    tank.type_keys('{ENTER}')
-    return
-
-  def setLiquidMassOrVolume(self, data):
-    tank = self.dlg['Liquid Mass or Volume']
-    liquid_level = tank.child_window(auto_id="11", control_type="Edit")
-
-    liquid_level.set_text(data['Liquid level'])
-    tank.OK.click()
-    # tank.print_control_identifiers()
-    return
-
-  def selectSenario(self):
+  def select_senario(self) -> None:
     senario = self.dlg['Type of Tank Failure']
-    senario.child_window(title="Leaking tank, chemical is burning and forms a pool fire", auto_id="7", control_type="RadioButton").click()
+    senario.child_window(title='Leaking tank, chemical is burning and forms a pool fire', auto_id='7', control_type='RadioButton').click()
     senario.OK.click()
     try:
       senario.Dialog3.Yes.click()
     except:
       print('No dialog 3')
     return
-
-  def setAreaAndTypeOfLeak(self, data):
-    area = self.dlg['Area and Type of Leak']
-    diameter = area.child_window(title="Opening diameter:", auto_id="10", control_type="Edit")
-
-
-    if (data['Leak through'] == "Hole"):
-      leak_through = area.child_window(title="Hole", auto_id="23", control_type="RadioButton")
-    else:
-      leak_through = area.child_window(title="Short pipe/valve", auto_id="24", control_type="RadioButton")
-      
-    
-    diameter.set_text(data['Opening Diameter (inches)'])
-    leak_through.select()
-    area.OK.click()
-    # area.print_control_identifiers()
-
-  def setHeightOfTheTankOpening(self, data):
-    height_of_the_tank_openinght = self.dlg['Height of the Tank Opening']
-    height = height_of_the_tank_openinght.child_window(title="OR", auto_id="11", control_type="Edit")
-
-    height.set_text(data['Height of the Tank opening'])
-    
-    height_of_the_tank_openinght.OK.click()
-
-  def setPuddleParameters(self):
-    puddle_parameters = self.dlg['Puddle Parameters']
-    puddle_parameters.Concrete.click()
-    puddle_parameters.Ok.click()
   
-  def setMaximumPuddleSize(self):
-    puddle_parameters = self.dlg['Maximum Puddle Size']
-    puddle_parameters.Ok.click()
-    
-  def setHazardToAnalyze(self):
-    self.dlg['Hazard To Analyze'].wait('visible')
-    hazard = self.dlg['Hazard To Analyze']
-    hazard.child_window(title="Flammable Area of Vapor Cloud", auto_id="6", control_type="RadioButton").click()
-    hazard.OK.click()
-      
-    self.dlg['.*Flamable Level.*'].OK.click()
+  def set_maximum_puddle_size(self) -> None:
+    puddle_parameters_dlg = self.dlg['Maximum Puddle Size']
+    puddle_parameters_dlg.Ok.click()
     return
 
-  def threatZone(self, index=1):
+  def threat_zone(self, index=1):
     self.dlg.type_keys('^f')
     self.dlg['Thermal Radiation Level of Concern'].Ok.click()
     
@@ -233,28 +125,14 @@ class Case_2(Strategy):
     self.dlg['Thermal Radiation Threat Zone'].Cerrar.click()
 
     try:
-      self.exportThreatZone(index)
+      self.functions.export_threat_zone(
+        first_run = self.first_run,
+        lat_deg = self.lat_deg,
+        lat_min = self.lat_min,
+        long_deg = self.long_deg,
+        long_min = self.long_min,
+        index = index,
+      )
     except:
       print('No treat zone graphics {0}'.format(index))
       self.dlg.type_keys('{ESC 2}')
-
-    
-
-  def exportThreatZone(self, index=1):
-    self.dlg.Menu3.File.select()
-    self.dlg.FileDialog.File.MenuItem6.select()
-    export = self.dlg['Export Threat Zones']
-    if (self.first_run):
-      export.RadioButton2.click()
-      export.child_window(title="Longitude", auto_id="15", control_type="Edit").set_text(self.lat_deg)
-      export.child_window(auto_id="16", control_type="Edit").set_text(self.lat_min)
-      export.child_window(auto_id="20", control_type="Edit").set_text(self.long_deg)
-      export.child_window(auto_id="21", control_type="Edit").set_text(self.long_min)
-    export.Ok.click()
-    self.dlg['.*Save Threat Zone.*'].type_keys(index)
-    if (self.first_run):
-      sys.stdout = sys.__stdout__
-      input("Press Enter to continue...")
-      sys.stdout = open(r'automate_aloha\logs\logs.txt', 'a')
-    self.dlg['.*Save Threat Zone.*'].type_keys('{ENTER}')
-  
