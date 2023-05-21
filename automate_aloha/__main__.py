@@ -9,10 +9,10 @@ import sys
 print('Running Case: ', ALOHA_CASE)
 
 # read .csv file
-print(r'automate_aloha\out\caso_{}'.format(ALOHA_CASE), os.path.exists(r'out\caso_{}'.format(ALOHA_CASE)))
+print(r'automate_aloha\out\caso_{}'.format(ALOHA_CASE), os.path.exists(r'automate_aloha\out\caso_{}'.format(ALOHA_CASE)))
 
-df = pd.read_csv(ALOHA_DATA)
-data = df.to_dict(orient='records')
+data_df = pd.read_csv(ALOHA_DATA)
+data = data_df.to_dict(orient='records')
 
 # set up the foder
 if not os.path.exists(r'automate_aloha\out\caso_{}'.format(ALOHA_CASE)):
@@ -28,7 +28,7 @@ try:
     pass
 except:
   colors = OUT_DATA[ALOHA_CASE]
-  pd.DataFrame.from_dict(colors, orient='columns').to_csv(colors_path, mode='w')
+  pd.DataFrame.from_dict(colors, orient='columns').to_csv(colors_path,index=False, mode='w')
 
 close = True
 sys.stdout = open(r'automate_aloha\logs\logs.txt', 'w')
@@ -46,8 +46,8 @@ if close:
         print('Already done {i}'.format(i=i))
     except:
       # read Color.csv and find index i in column 'index'
-      df = pd.read_csv(colors_path)
-      if (i in df['index'].values):
+      out_df = pd.read_csv(colors_path)
+      if (i in out_df['index'].values):
         print('Already done {i}'.format(i=i))
         continue
       if (x['Liquid level'] == 0):
@@ -55,8 +55,16 @@ if close:
         continue
       if x['Liquid level'] <= x['Height of the Tank opening']:
         print('Liquid level <= Height of the Tank opening')
+        print(x['Liquid level'], x['Height of the Tank opening'])
         continue
       alohaApp.run(x, i)
+
+      # save data in out.csv
+      out_df = pd.read_csv(colors_path)
+      df_combined = data_df.merge(out_df, left_index=True, right_on="index", how='left')
+      df_combined = df_combined.drop(columns=["index"])
+      df_combined.to_csv(r'automate_aloha\out\caso_{}\out.csv'.format(ALOHA_CASE), index=False)
+
       print('Done {i}'.format(i=i))
     print('----------------------------------')
 
