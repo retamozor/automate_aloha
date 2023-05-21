@@ -27,6 +27,12 @@ class Aloha:
     self.dlg["ALOHA's Limitations"].wait('visible')
     self.dlg["ALOHA's Limitations"].OK.click()
 
+    # set display units
+    self.dlg.type_keys('^y')
+    self.dlg["Display Options"].print_control_identifiers()
+    self.dlg["Display Options"].child_window(title="Metric units", auto_id="5", control_type="RadioButton").click()
+    self.dlg["Display Options"].OK.click()
+
     # get location
     self.dlg.type_keys('^l')
     self.dlg['Location Information'].Modify.click()

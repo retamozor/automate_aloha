@@ -33,7 +33,7 @@ class Case_1(Strategy):
       colors[color] = [data]
 
     # save in csv
-    pd.DataFrame.from_dict(colors, orient='columns').to_csv(r'automate_aloha\out\caso_1\Colors.csv', mode='a', header=False)
+    pd.DataFrame.from_dict(colors, orient='columns').to_csv(r'automate_aloha\out\caso_1\Colors.csv', mode='a', header=False, index=False)
     
     return
   

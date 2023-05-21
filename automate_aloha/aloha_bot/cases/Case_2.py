@@ -31,7 +31,7 @@ class Case_2(Strategy):
       'Red': [''],
       'Orange': [''],
       'Yellow': [''],
-      'Max Flame Length': [re.findall('Max Flame Length: .*yards', source)[0].split(': ')[1].strip()],
+      'Max Flame Length': [re.findall('Max Flame Length: .*meters', source)[0].split(': ')[1].strip()],
       'Burn Duration': [re.findall('Burn Duration: .*', source)[0].split(': ')[1].strip()],
       'Max Burn Rate': [re.findall('Max Burn Rate: .*', source)[0].split(': ')[1].strip()],
       'Total Amount Burned': [re.findall('Total Amount Burned: .*', source)[0].split(': ')[1].strip()],
@@ -43,7 +43,7 @@ class Case_2(Strategy):
       colors[color] = [data]
 
     # save in csv
-    pd.DataFrame.from_dict(colors, orient='columns').to_csv(r'automate_aloha\out\caso_2\Colors.csv', mode='a', header=False)
+    pd.DataFrame.from_dict(colors, orient='columns').to_csv(r'automate_aloha\out\caso_2\Colors.csv', mode='a', header=False, index=False)
     
     return
   
